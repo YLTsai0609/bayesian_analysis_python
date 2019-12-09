@@ -50,12 +50,11 @@ for i in range(4):
 ax[3,0].set_xlabel('$\\theta$', fontsize=14)
 ax[0,0].set_ylabel('$p(\\theta)$', fontsize=14)
 save = input("Save the figure? y/n")
-if save == y:
+if save == 'y':
     plt.savefig(FILE_PATH_beta, dpi=300, figsize=(12, 8))
 
 FILE_PATH_Posterior = '../images/Posterior.png'
 
-plt.subplot?
 
 # +
 # A better plot?

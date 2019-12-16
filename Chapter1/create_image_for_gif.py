@@ -40,13 +40,28 @@ def get_subtitle(alpha : int, beta : int) -> str:
 
 # ref 
 # https://matplotlib.org/3.1.1/gallery/statistics/histogram_features.html#sphx-glr-gallery-statistics-histogram-features-py
+# idx = 0
+# for Path, Directory, files in os.walk("C:\\照片路徑"):
+#     for sfile in files:
+#         Serial_Num = 0
+#         NewFileName = "000_%s.txt" % str(Serial_Num)
 
+def get_prefix(idx):
+    if idx < 10:
+        return f'000{idx}'
+    elif idx < 100:
+        return f'00{idx}'
+    else:
+        return
+idx = 0
 params = [0.5, 1, 2, 3, 5, 20]
 x = np.linspace(0, 1, 100)
 for i in range(len(params)):
     for j in range(len(params)):
         f, ax = plt.subplots(figsize=(12, 8))
-        FILE_PATH_beta_gif = f'../gif/beta_alpha{params[i]}_beta_{params[j]}.png'
+        prefix = get_prefix(idx)
+        FILE_PATH_beta_gif = f'../gif/{prefix}_beta_alpha{params[i]}_beta_{params[j]}.png'
+        print(FILE_PATH_beta_gif)
         a = params[i]
         b = params[j]
         y = stats.beta(a, b).pdf(x) # the meats
@@ -59,3 +74,5 @@ for i in range(len(params)):
         # save = input("Save the figure? y/n")
         # if save == 'y':
         plt.savefig(FILE_PATH_beta_gif, dpi=50, figsize=(12, 8))
+        idx += 1
+    

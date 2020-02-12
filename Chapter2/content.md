@@ -76,6 +76,7 @@ MCMC(Markov Chain Monte Carlo)拆解成兩個部分說明
 ##### 什麼是馬可夫鍊?
 [資料 1, Wiki](https://zh.wikipedia.org/wiki/%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E9%93%BE)
 [資料2, 不知名 Intro](http://episte.math.ntu.edu.tw/articles/mm/mm_09_3_08/page2.html)
+[可以參照Data Science Note中的Markov Chain Section](https://github.com/YLTsai0609/DataScience_Note/blob/master/Markov_chain_MCMC.md)
 * 一種對於序列問題的描述
 當前狀態只與上一部的狀態**有相關**，就稱為馬可夫狀態(基本上記憶性只有一格的意思)
 * 與獨立事件不同，講述的是相關，而相關可以跟好幾部以前相關，Markov chain是最簡單且有好數學性質的一種，只和上一個狀態有關
@@ -103,3 +104,21 @@ $$
 總結的說，如果我們能夠找到滿足Detailed Balance Conditon的馬可夫鍊，就可以保證從採樣中得到的分佈來自於我們的後驗分佈，而保證上述條件目前最流行的算法是Metropolis-Hasting算法
 
 #### Monte Carlo
+Monte Carlo是一系列應用非常廣泛的算法，**其思想是通過隨機採樣或是計算麼你給定過程**，Monte Carlo是位於摩洛哥公園一個非常有名的城市，開發者Stanislaw Ulam。Stan正是基於這一核心思想 - **儘管很多問題都難以求解甚至無法精確用公式表達，但我們可以通過採樣或者模擬來有效地研究**
+* 使用Monte Carlo方法計算數值的例子中，一個經典例子是估計$\pi$
+* 在邊長為$2R$的帳方形內隨機撒$N$個點
+* 在正方形內化一個半徑為$R$的圓，計算在圓圈內點的個數
+* 得出$\hat{\pi}$的估計值$\frac{4\times inside}{N}$
+* inside的counts $\sqrt{(x^2 + y^2)}\leq R$
+* 因為正方形的面積是$4R^2$，元的面積是$\pi R^2$所以兩者的比例是$\frac{\pi}{4}$，因此我們可以估計$\hat{\pi}$
+
+#### Metroplis Hasting
+
+#### Hamiton Monte Carlo
+
+#### 其他MCMC
+* 總結來說，MCMC目前有許多研究正走向平行化的計算，畢竟MCMC最為人詬病的就是慢!
+
+#### PyMC3
+* PyMC3是一個用於機率編程的Python library，PyMC3提供了一套非常簡潔直觀的語法，非常接近統計學中描述機率模型的語法，可讀性很高，核心部分基於Numpy和Theano
+* 用PyMC3來解拋硬幣問題(單參數估計)(見ch2.py)

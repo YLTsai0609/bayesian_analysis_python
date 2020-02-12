@@ -1,20 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-import seaborn as sns
 plt.style.use('fivethirtyeight')
-
-# 尚未 normolize
-
-# uniform alpha 1, beta 1
-# bias dis 0.5, 0.5
-
-# expoentail 
-# growth alpha > beta when alpha = 1
-# decay alpha < beta when alpha = 1
-
-# gaussian-like alpha = beta 但 != 1, ex 2, 5, 20
-# pick 5, 5, 20, 20
 
 # 這裡指的Gaussian-like並不是說真的是高斯函數，而是長得像高斯函數，例如alpha=beta=2的圖型
 # 並沒有反曲點，所以也不能稱作Gaussian函數，但我們可以看到 alpha=beta=3, 5, 20時，我們確實可以看到反曲點
@@ -38,13 +25,6 @@ def get_subtitle(alpha : int, beta : int) -> str:
             return '$positve~~skew~~gaussian-like~~~distribution$'
 
 
-# ref 
-# https://matplotlib.org/3.1.1/gallery/statistics/histogram_features.html#sphx-glr-gallery-statistics-histogram-features-py
-# idx = 0
-# for Path, Directory, files in os.walk("C:\\照片路徑"):
-#     for sfile in files:
-#         Serial_Num = 0
-#         NewFileName = "000_%s.txt" % str(Serial_Num)
 
 def get_prefix(idx):
     if idx < 10:

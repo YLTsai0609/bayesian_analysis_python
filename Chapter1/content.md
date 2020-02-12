@@ -117,7 +117,7 @@ Coin toss experienment
 
 $$p(\theta | y) \propto p(y|\theta)p(\theta)$$
 
-我們需要指定使用的先驗$p(\theta)$以及可性性$p(y|\theta)$
+我們需要指定使用的先驗$p(\theta)$以及可能性$p(y|\theta)$
 
 ##### 選擇可能性
 
@@ -136,7 +136,7 @@ $$p(\theta | y) = \frac{N!}{y!(N-y)!}\theta^{y}(1-\theta)^{N-y}$$
 這裡我們選則貝葉斯統計中最常見的beta分佈作為先驗
 
 $$
-p(\theta | y) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}\theta^{\alpha - 1}(1-\theta)^{\beta - 1}
+p(\theta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}\theta^{\alpha - 1}(1-\theta)^{\beta - 1}
 $$
 ##### 介紹Beta分佈
 * 數學式的部分 

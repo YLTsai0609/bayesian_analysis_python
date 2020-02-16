@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # %matplotlib inline
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,6 +67,7 @@ theta_real = 0.35
 trials = [0, 1, 2, 3, 4, 8, 16, 32, 50, 150]
 data = [0, 1, 1, 1, 1, 4, 6, 9, 13, 48]
 
+# 使用beta作為先驗分佈，1,1 -> 均勻分布, 0.5, 0.5 bias distribution, 20, 20 guassia-like distribution
 beta_params = [(1, 1), (0.5, 0.5), (20, 20)]
 dist = stats.beta
 x = np.linspace(0, 1, 100)

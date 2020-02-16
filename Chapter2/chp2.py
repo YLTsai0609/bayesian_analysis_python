@@ -55,9 +55,9 @@ plt.plot(0, 0, label='heads = {}\ntosses = {}'.format(h, n), alpha=0)
 plt.xlabel(r'$\theta$', fontsize=14)
 plt.legend(loc=0, fontsize=14)
 
-save = input("Save the figure? y/n")
-if save == 'y':
-    plt.savefig(FILE_PATH_brute_force, dpi=300, figsize=(5.5, 5.5));
+# save = input("Save the figure? y/n")
+# if save == 'y':
+#     plt.savefig(FILE_PATH_brute_force, dpi=300, figsize=(5.5, 5.5));
 # -
 
 # ## Monte Carlo
@@ -83,11 +83,11 @@ plt.plot(0, 0, label='$\hat \pi$ = {:4.3f}\nerror = {:4.3f}%'.format(pi, error),
 plt.axis('square')
 plt.legend(frameon=True, framealpha=0.3, fontsize=16);
 
-save = input("Save the figure? y/n")
-if save == 'y':
-    plt.savefig(FILE_PATH_monte_carlo, dpi=300, figsize=(5.5, 5.5))
+# save = input("Save the figure? y/n")
+# if save == 'y':
+#     plt.savefig(FILE_PATH_monte_carlo, dpi=300, figsize=(5.5, 5.5))
 
-    
+
 # -
 
 # ## Metroplis Hasting
@@ -126,14 +126,14 @@ plt.xlabel('$x$', fontsize=14)
 plt.ylabel('$pdf(x)$', fontsize=14)
 plt.legend(fontsize=14)
 
-save = input("Save the figure? y/n")
-if save == 'y':
-    plt.savefig(FILE_PATH_metropolis_hasting, dpi=300, figsize=(5.5, 5.5))
+# save = input("Save the figure? y/n")
+# if save == 'y':
+#     plt.savefig(FILE_PATH_metropolis_hasting, dpi=300, figsize=(5.5, 5.5))
 # -
 # # PyMC3 for Coin toss
 
 
-# 二元白努力分佈，real value 取0.35
+# 二項分佈，real value 取0.35
 np.random.seed(123)
 n_experiments = 4
 theta_real = 0.35  # unkwon value in a real experiment
@@ -165,6 +165,7 @@ data
 with pm.Model() as our_first_model:
     theta = pm.Beta('theta', alpha=1, beta=1)
     y = pm.Bernoulli('y', p=theta, observed=data)
+#     y = pm.Binomial('y', p=theta, observed=data)
     start = pm.find_MAP()
     step = pm.Metropolis()
     trace = pm.sample(1000, step=step, start=start)
@@ -177,14 +178,136 @@ print(attr_method_list)
 our_first_model
 
 # ## 診斷採樣過程
+# ## sampling step是針對後驗進行採樣，在解析解種對應是什麼?
+# ### Review analytic solution
+#     * 在解析解的過程中，針對每一組資料點我們可以按照可能性以及先驗計算出後驗，持續迭代後驗，該行為可以被一次計算，因為有了試驗次數$N$以及試驗成功次數$y$，假定可能性函數為二項分佈的情況下，我們就能夠計算出可能性分佈
+# $$
+# p(\theta | y) = \frac{N!}{y!(N-y)!}\theta^{y}(1-\theta)^{N-y}
+# $$
+#     <img src = '../images/bay_chp1_3.png'></img>
+#     * 然後一次性的計算出後驗分佈
+# $$
+# p(\theta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}\theta^{\alpha - 1}(1-\theta)^{\beta - 1}
+# $$
+#
+# $$
+# p(\theta | y) \propto \theta^{\alpha -1 + y}(1-\theta)^{\beta -1 +N -y}
+# $$
+#     * 只要把數字帶進去我們就找到後驗分佈了
+# ### Ans
+# * 既然是可以被一次性計算的，抽樣次數越多其實就是越貼近後驗分佈，所以抽樣次數少，得到的後驗分佈更rough，抽樣次數多，得到的後驗分佈更detail，既然如此，我們能否知道**MCMC抽樣何時收斂? 抽多少sample即可?**
 
 # ## 收斂性
+# * [參考](https://wangcc.me/LSHTMlearningnote/MCMC-methods.html#%E4%BD%BF%E7%94%A8-mcmc-%E6%99%82%E9%9C%80%E8%A6%81%E8%80%83%E6%85%AE%E7%9A%84%E4%B8%80%E4%BA%9B%E5%95%8F%E9%A1%8C)
+# * initial value - 這些起始值是用來輔助 MCMC 採樣的，起始值並不是先验概率(initial values are not priors)。
+# * 收斂時間 - 需要多少樣本才能讓樣本$\theta^{t}$接近後驗分佈$p(\theta|x)$
+# * 收斂效率 - 採集的樣本$\theta^{t}$是否在估計$p(\theta|x)$能夠有效的估計
+#
+# ### 收斂時間
+# 沒有人能夠準確地說出MCMC的採樣100%地達到收斂，然而關於判斷，確實有一些準則
+# * 視覺檢查
+# * 剔除不穩定的樣本(burn-in iterations)
+# * 指標計算 - 透過MCMC樣本的鏈內方差(within chain)和鏈間方差(between chain)來進行收斂診斷
+# 一般來說三者都會用，來確定說目前的MCMC很接近收斂了
+#
+# #### 具體來說
+# * 把MCMC事後概率分布採樣過程的整個歷史(history)痕跡(trace)全部繪制出來-不同起始值的同一個未知參數的MCMC鏈是否都給出了相對穩定的歷史痕跡？他們是否有合理的相互重疊(overlapping)？
+# * $theta^{i}$分佈應該看起來要類似高斯分佈，因為有中央極限定理，但是如果$N$很小，那就未必
+# * $theta^{i}$隨著iteration應該要看起來像white noise，表示震盪逐漸趨於隨機(意味著收斂)
+# * 檢查自我相關程度(autocorrelation)-過高的自相關暗示收斂過程較慢。(high autocorrelation is a symtom of slow convergence)。
+# * 看Gelman-Rubin收斂統計量-它通過比較MCMC鏈內方差(within variability)和鏈間方差(between variability)來評估MCMC鏈是否達到收斂。
+#
+# #### 參數太多時
+# * 隨機選取幾個來分析其結果是否收斂
 
-# ## 自相關
+attrs = [attr for attr in dir(chain) if not attr.startswith('_')]
+print(attrs, chain.chains, chain.get_values,
+      chain.point, chain.points,
+      chain.add_values,
+      chain.get_sampler_stats,
+      sep='\n\n')
+# check current theta
+# for i in range(0,1000, 50):
+#     print('-'*60)
+#     print(i)
+#     print(chain.point(i), chain.point(i+1))
+
+# * 每經過一次採樣，會得到'01100011', '1010100010010'的序列，每次都可以重新計算一次$\theta^{i}$，所以經過1000次，我們就可以有1000個$\theta^{i}, i \in \{0, N \}$
+# * 下左圖是$\theta^{i}$的KDE plot of histogram
+# * 下右圖是$\theta^{i}$隨著iteration的震盪值
+
+# +
+print(start, step, trace, sep='\n\n')
+burnin = 0  # no burnin
+chain = trace[burnin:]
+ax = pm.traceplot(chain, lines={'theta':theta_real}); # return 兩個ax, 分別是左圖跟右圖
+for sub_ax in ax[0]:
+    sub_ax.set_title('theta no burnin')
+
+
+
+print(start, step, trace, sep='\n\n')
+burnin = 250  # no burnin
+chain = trace[burnin:]
+pm.traceplot(chain, lines={'theta':theta_real});
+for sub_ax in ax[0]:
+    sub_ax.set_title('theta burnin = 250')
+
+# -
+
+# * 尚未收斂的$\theta$可能會在$\theta^{i}$ 和 iteration的子圖中展示出趨勢，這不是我們要的，我們希望看到white noise表示收斂了
+# <img src='../images/bay_chp2_1.png'></img>
+
+# # gelman rubin檢定可以說明什麼?
+# * 對於多條不同的MCMC trace，由於不同的trace是從不同的初始點開始，而且過程彼此是獨立的，所以可以確認多個trace中在$\theta$ vs iteration的子圖中是否互相重疊，是否皆為white noise，而kde plot是否有類似的分佈，對於一個趨近於穩定的分佈
+# * trace1和trace2的表現應該要差不多，我們從within-chain variance以及between-chain variance來看，即Gelman-Rubin檢驗，理想狀態下，檢驗值應該要是1，我們收到的值如果低於1.1，那麼就可以認為是收斂的了，更高的值則意味著沒有收斂
+#
+# ## step of gelman rubin
+# 1. $m$th chain, $N_{m}$ interations : $\theta^{m}_{1}, \theta^{m}_{2}, \theta^{m}_{3}, ...\theta^{m}_{N_{m}}$
+# 2. 對於每個parameter chain $\theta$, 後驗平均(posterior mean $\hat{\theta_{m}} = \frac{1}{N_{m}} \sum_{i}^{N_{m}} \theta^{m}_{i}$)
+# 3. 對於每個parameter，chain $\theta$ 後驗方差(intra-chain variance)
+# $\sigma^{2}_{m} = \frac{1}{N_{m}-1} \sum_{i}^{N_{m}} (\theta^{m}_{i} - \hat{\theta^{m}})^{2}$
+# 4. 計算parameter mean ay chains level $\hat{\theta} = \frac{1}{M} \sum_{m}^{M}\hat{\theta_{m}}$
+# 5. Compute how indiv. means scatter around the joint mean
+# (計算一個數值$B$，類似每個chain的平均$\hat{\theta_{m}}$距離對於chain的平均$\hat{\theta}$的變異數，再進行伸縮)
+# $B = \frac{N}{M-1} \sum_{m=1}^{M} (\hat{\theta_{m}} - \hat{\theta})^{2}$
+# 6. 計算variance mean at chains level
+# $W = \frac{1}{M} \sum_{m=1}^{M} \sigma^{2}_{m}$
+# 7. 計算$\hat{V} = \frac{N-1}{N}W + \frac{M+1}{MN}B$
+# 8. test whether $R=\sqrt{\hat{V}/W}～1$
+#
+# * TBD....
+# [google key words](https://www.google.com/search?safe=strict&sxsrf=ACYBGNRe2B7cbde-AdozJFSWvBTQ4L5LpQ%3A1581845967510&ei=zw1JXuvZHo2JmAXVypDgCQ&q=gelman+rubin+explained+medium&oq=gelman+rubin+explained+medium&gs_l=psy-ab.3...161688.162555..162701...0.0..0.158.1067.0j9......0....1..gws-wiz.......33i160j33i22i29i30j33i21.z4DxADGTU2I&ved=0ahUKEwir_e2349XnAhWNBKYKHVUlBJwQ4dUDCAs&uact=5)
+#
+# [Gelman–Rubin convergence diagnostic using multiple chains
+# ](https://blog.stata.com/2016/05/26/gelman-rubin-convergence-diagnostic-using-multiple-chains/)
+#
+# [Convergence tests for MCMC](https://www.imperial.ac.uk/media/imperial-college/research-centres-and-groups/astrophysics/public/icic/data-analysis-workshop/2018/Convergence-Tests.pdf)
+
+pm.gelman_rubin(chain)
+
+
+# ## 關於模型效率
+
+# # 兩個$\theta^{i}$的自相關性，如何解釋MCMC會造成自相關性?
+
+pm.autocorrplot(chain)
+
+pm.forestplot(chain, varnames=['theta']);
+
+pm.stats.summary(chain)
 
 # ## 總結後驗
 
+pm.effective_n(chain)
+
+pm.plot_posterior(chain)
+
 # ## 基於後驗的決策
+
+pm.plot_posterior(chain, rope=[0.45, 0.55])
+
+pm.plot_posterior(chain, ref_val=0.5)
 
 # ## 損失函數
 

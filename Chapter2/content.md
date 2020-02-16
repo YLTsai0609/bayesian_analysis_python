@@ -122,3 +122,4 @@ Monte Carlo是一系列應用非常廣泛的算法，**其思想是通過隨機�
 #### PyMC3
 * PyMC3是一個用於機率編程的Python library，PyMC3提供了一套非常簡潔直觀的語法，非常接近統計學中描述機率模型的語法，可讀性很高，核心部分基於Numpy和Theano
 * 用PyMC3來解拋硬幣問題(單參數估計)(見ch2.py)
+* [使用MCMC時的收斂性以及hint可以參考](https://wangcc.me/LSHTMlearningnote/MCMC-methods.html#%E4%BD%BF%E7%94%A8-mcmc-%E6%99%82%E9%9C%80%E8%A6%81%E8%80%83%E6%85%AE%E7%9A%84%E4%B8%80%E4%BA%9B%E5%95%8F%E9%A1%8C)
